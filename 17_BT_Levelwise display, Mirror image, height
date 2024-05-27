@@ -1,0 +1,220 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+// Node structure
+typedef struct Node {
+    int data;
+    struct Node *left, *right;
+} Node;
+
+// Queue structure for level order traversal
+typedef struct Queue {
+    Node* data;
+    struct Queue* next;
+} Queue;
+
+// Function prototypes
+Node* createNode(int data);
+void levelOrderTraversal(Node* root);
+Node* mirrorImage(Node* root);
+int treeHeight(Node* root);
+void enqueue(Queue** front, Queue** rear, Node* node);
+Node* dequeue(Queue** front, Queue** rear);
+Node* createBinaryTree();
+
+// Function to create a new node
+Node* createNode(int data) {
+    Node* newNode = (Node*)malloc(sizeof(Node));
+    newNode->data = data;
+    newNode->left = newNode->right = NULL;
+    return newNode;
+}
+
+// Function to create the predefined binary tree
+Node* createBinaryTree() {
+    Node* root = createNode(20);
+    root->left = createNode(23);
+    root->right = createNode(27);
+    root->left->left = createNode(80);
+    root->left->right = createNode(50);
+    root->right->left = createNode(21);
+    root->right->right = createNode(35);
+    return root;
+}
+
+// Function to perform level order traversal
+void levelOrderTraversal(Node* root) {
+    if (root == NULL) {
+        return;
+    }
+
+    Queue* front = NULL;
+    Queue* rear = NULL;
+    enqueue(&front, &rear, root);
+
+    while (front != NULL) {
+        Node* current = dequeue(&front, &rear);
+
+        printf("%d ", current->data);
+
+        if (current->left != NULL) {
+            enqueue(&front, &rear, current->left);
+        }
+
+        if (current->right != NULL) {
+            enqueue(&front, &rear, current->right);
+        }
+    }
+    printf("\n");
+}
+
+// Function to create the mirror image of the tree
+Node* mirrorImage(Node* root) {
+    if (root == NULL) {
+        return NULL;
+    }
+
+    Node* stack[100];
+    int top = -1;
+
+    stack[++top] = root;
+
+    while (top != -1) {
+        Node* current = stack[top--];
+
+        // Swap left and right children
+        Node* temp = current->left;
+        current->left = current->right;
+        current->right = temp;
+
+        // Push left and right children onto the stack
+        if (current->left != NULL) {
+            stack[++top] = current->left;
+        }
+        if (current->right != NULL) {
+            stack[++top] = current->right;
+        }
+    }
+
+    return root;
+}
+
+// Function to calculate the height of the tree
+int treeHeight(Node* root) {
+    if (root == NULL) {
+        return 0;
+    }
+
+    Queue* front = NULL;
+    Queue* rear = NULL;
+    enqueue(&front, &rear, root);
+    int height = 0;
+
+    while (1) {
+        int nodeCount = 0;
+        Queue* temp = front;
+
+        while (temp != NULL) {
+            nodeCount++;
+            temp = temp->next;
+        }
+
+        if (nodeCount == 0) {
+            return height;
+        }
+
+        height++;
+
+        while (nodeCount > 0) {
+            Node* current = dequeue(&front, &rear);
+
+            if (current->left != NULL) {
+                enqueue(&front, &rear, current->left);
+            }
+
+            if (current->right != NULL) {
+                enqueue(&front, &rear, current->right);
+            }
+
+            nodeCount--;
+        }
+    }
+}
+
+// Function to enqueue a node
+void enqueue(Queue** front, Queue** rear, Node* node) {
+    Queue* temp = (Queue*)malloc(sizeof(Queue));
+    temp->data = node;
+    temp->next = NULL;
+
+    if (*rear == NULL) {
+        *front = *rear = temp;
+        return;
+    }
+
+    (*rear)->next = temp;
+    *rear = temp;
+}
+
+// Function to dequeue a node
+Node* dequeue(Queue** front, Queue** rear) {
+    if (*front == NULL) {
+        return NULL;
+    }
+
+    Queue* temp = *front;
+    Node* node = temp->data;
+    *front = (*front)->next;
+
+    if (*front == NULL) {
+        *rear = NULL;
+    }
+
+    free(temp);
+    return node;
+}
+
+// Main function
+int main() {
+    Node* root = createBinaryTree();
+
+    int choice;
+    while (1) {
+        // printf("\nMenu:\n");
+        // printf("1. Level order traversal\n");
+        // printf("2. Mirror the tree\n");
+        // printf("3. Tree height\n");
+        // printf("4. Exit\n");
+        // printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                printf("Level order traversal: ");
+                levelOrderTraversal(root);
+                break;
+            case 2:
+                root = mirrorImage(root);
+                printf("Tree has been mirrored.\n");
+                break;
+            case 3:
+                printf("Height of the tree: %d\n", treeHeight(root));
+                break;
+            case 4:
+                printf("Exiting!!!!\n");
+                exit(0);
+                break;
+            default:
+                printf("Invalid choice. Please try again.\n");
+        }
+    }
+
+    return 0;
+}
+
+
+1
+2
+1
+3
+4
